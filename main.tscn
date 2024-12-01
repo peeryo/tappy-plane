@@ -1,0 +1,74 @@
+[gd_scene load_steps=8 format=3 uid="uid://cuerfikvby0ef"]
+
+[ext_resource type="Script" path="res://main.gd" id="1_7wi1p"]
+[ext_resource type="PackedScene" uid="uid://crn1wb70pvifo" path="res://player.tscn" id="1_wvlsa"]
+[ext_resource type="PackedScene" uid="uid://drsk4f5j5o7ln" path="res://obstacle.tscn" id="2_5il7r"]
+[ext_resource type="Script" path="res://parallax_background.gd" id="4_bbr7u"]
+[ext_resource type="Texture2D" uid="uid://ble1i60calyys" path="res://Tappy Plane/PNG/background.png" id="4_hdoj5"]
+[ext_resource type="Texture2D" uid="uid://tvockgxwf56x" path="res://Tappy Plane/PNG/groundGrass.png" id="5_t1twq"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_twahb"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_7wi1p")
+obstacle_scene = ExtResource("2_5il7r")
+
+[node name="Player" parent="." instance=ExtResource("1_wvlsa")]
+position = Vector2(304, 226)
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 2.0
+autostart = true
+
+[node name="Button" type="Button" parent="."]
+visible = false
+offset_left = 339.0
+offset_top = 340.0
+offset_right = 440.0
+offset_bottom = 398.0
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 36
+disabled = true
+text = "Retry
+"
+
+[node name="Label" type="Label" parent="."]
+offset_left = 40.0
+offset_top = 30.0
+offset_right = 101.0
+offset_bottom = 53.0
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 36
+text = "Score: 0"
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+script = ExtResource("4_bbr7u")
+
+[node name="Background" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.25, 0.25)
+motion_mirroring = Vector2(800, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/Background"]
+position = Vector2(401, 243)
+texture = ExtResource("4_hdoj5")
+
+[node name="Midground" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.5, 0.5)
+motion_mirroring = Vector2(800, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/Midground"]
+position = Vector2(400, 445)
+texture = ExtResource("5_t1twq")
+
+[node name="Area2D" type="Area2D" parent="."]
+position = Vector2(0, 515)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("WorldBoundaryShape2D_twahb")
+
+[node name="Area2D2" type="Area2D" parent="."]
+position = Vector2(0, -24)
+rotation = -3.13554
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D2"]
+shape = SubResource("WorldBoundaryShape2D_twahb")
