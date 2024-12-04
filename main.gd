@@ -33,9 +33,11 @@ func _on_Player_hit_obstacle() -> void:
 	disable_obstacle_signals()
 	
 func disable_obstacle_signals() -> void:
-	for obstacle in obstacles:
-		if obstacle and is_instance_valid(obstacle):
-			obstacle.disconnect("obstacle_passed", Callable(self, "_on_obstacle_passed"))
+	for obstacle in obstacles: #iterate over obstacles
+		if is_instance_valid(obstacle):  # Ensure the obstacle exists
+			if obstacle.is_connected("obstacle_passed", self, "_on_obstacle_passed"):  # Check connection
+				obstacle.disconnect("obstacle_passed", self, "_on_obstacle_passed")
+
 	
 func _on_Button_pressed() -> void:
 	get_tree().reload_current_scene()

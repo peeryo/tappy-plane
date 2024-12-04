@@ -24,6 +24,8 @@ var rotation_speed: float = 5.0
 var can_flap: bool = true
 
 var forcefield_active: bool = false
+
+var forcefield_active_obstacles: Array = []  # List to track obstacles with disabled collisions
  
 func _ready() -> void:
 	area_2d.area_entered.connect(Callable(self, "_on_area_2d_area_entered"))
@@ -63,8 +65,9 @@ func _on_forcefield_area_entered(area: Area2D) -> void:
 	# Handle collision with obstacles
 	if area.name == "Obstacle":
 		if forcefield_active:
-			print ("forcefield neutralized the object")
-			area.queue_free()  # Removes the obstacle
+			print ("forcefield active: passing through the object")
+			area.disable_collision()  # Removes the collision shape
+			forcefield_active_obstacles.append(area) #track for later re-enabling
 		else:
 			print("Player hits an object!")
 			timer.start()
@@ -84,3 +87,10 @@ func _on_forcefield_timer_timeout() -> void:
 	forcefield_active = false
 	collision_shape_FF.disabled = true
 	sprite_2d_FF.visible = false
+	
+	#re-enable collisions for any affected obstacles
+	for obstacle in forcefield_active_obstacles:
+		if obstacle and not obstacle.collision_disabled:
+			obstacle.enable_collision()
+	forcefield_active_obstacles.clear() #clear the list
+			
