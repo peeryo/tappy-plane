@@ -34,7 +34,7 @@ func _ready() -> void:
 	collision_shape_FF.disabled = true
 	sprite_2d_FF.visible = false
 	force_field_timer.timeout.connect(_on_forcefield_timer_timeout)
-	forcefield.area_entered.connect(Callable(self, "_on_forcefield_entered"))
+	forcefield.area_entered.connect(Callable(self, "_on_forcefield_area_entered"))
  
 func _on_area_2d_area_entered(area):
 	timer.start()
@@ -55,19 +55,22 @@ func _process(delta: float) -> void:
 	rotation = lerp(rotation, target_rotation, rotation_speed * delta)
 	position += motion * delta
 	
-	if Input.is_action_just_pressed("forcefield") and not forcefield.active:
+	if Input.is_action_just_pressed("forcefield") and not forcefield_active:
+		print("forcefield activated")
 		activate_forcefield()
 		
 func _on_forcefield_area_entered(area: Area2D) -> void:
 	# Handle collision with obstacles
-	if not forcefield_active:
-		timer.start()
-		cpu_particles_2d.emitting = true
-		can_flap = false
-		area.queue_free()  # Removes the obstacle
-	else:
-		print("Forcefield neutralized the obstacle!")
-		area.queue_free()  # Neutralize obstacle
+	if area.name == "Obstacle":
+		if forcefield_active:
+			print ("forcefield neutralized the object")
+			area.queue_free()  # Removes the obstacle
+		else:
+			print("Player hits an object!")
+			timer.start()
+			cpu_particles_2d.emitting = true
+			can_flap = false
+
 		
 func activate_forcefield() -> void:
 	print("forcefield activated")

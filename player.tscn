@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://crn1wb70pvifo"]
+[gd_scene load_steps=7 format=3 uid="uid://crn1wb70pvifo"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_n7oah"]
 [ext_resource type="Texture2D" uid="uid://cpkchi4raq1rs" path="res://Tappy Plane/PNG/Planes/planeBlue1.png" id="1_uoe7d"]
 [ext_resource type="Texture2D" uid="uid://jmfbrgrumj2w" path="res://Tappy Plane/PNG/puffLarge.png" id="3_rbw0l"]
+[ext_resource type="Texture2D" uid="uid://bai7u2qfaymcq" path="res://glow_texture.png" id="4_kfqdy"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_f60hy"]
 radius = 43.1045
@@ -31,11 +32,14 @@ emission_sphere_radius = 30.0
 gravity = Vector2(-250, -500)
 
 [node name="Forcefield" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Forcefield"]
 shape = SubResource("CircleShape2D_krqlr")
 
 [node name="Sprite2D" type="Sprite2D" parent="Forcefield"]
+texture = ExtResource("4_kfqdy")
 
 [node name="ForceFieldTimer" type="Timer" parent="Forcefield"]
 wait_time = 3.0
