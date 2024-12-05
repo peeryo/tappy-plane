@@ -1,96 +1,73 @@
 extends Node2D
- 
-@onready var area_2d = $Area2D
-@onready var timer = $Timer
-@onready var cpu_particles_2d = $CPUParticles2D
 
-#forcefield stuff
-@onready var forcefield: Area2D = $Forcefield
-@onready var collision_shape_FF: CollisionShape2D = $Forcefield/CollisionShape2D
-@onready var sprite_2d_FF: Sprite2D = $Forcefield/Sprite2D
-@onready var force_field_timer: Timer = $Forcefield/ForceFieldTimer
-
- 
+# Signals
 signal hit_obstacle
- 
-# Game variables
+
+# Node References
+@onready var sprite_2d = $Sprite2D
+@onready var area_2d = $Area2D
+@onready var collision_shape_2d = $Area2D/CollisionShape2D
+@onready var timer = $Timer  # Corrected path
+@onready var cpu_particles_2d = $CPUParticles2D
+@onready var forcefield = $Forcefield
+@onready var collision_shape_FF = $Forcefield/CollisionShape2D
+@onready var sprite_2d_FF = $Forcefield/Sprite2D
+@onready var forcefield_timer = $Forcefield/ForceFieldTimer
+
+# Physics Variables
 var gravity: float = 1000.0
 var flap_strength: float = -400.0
 var motion: Vector2 = Vector2.ZERO
- 
-var max_rotation_angle: float = PI / 4 
-var rotation_speed: float = 5.0
- 
-var can_flap: bool = true
 
+var max_rotation_angle: float = PI / 4
+var rotation_speed: float = 5.0
+
+var can_flap: bool = true
 var forcefield_active: bool = false
 
-var forcefield_active_obstacles: Array = []  # List to track obstacles with disabled collisions
- 
 func _ready() -> void:
-	area_2d.area_entered.connect(Callable(self, "_on_area_2d_area_entered"))
-	timer.timeout.connect(death)
-	
-	#forcefield stuff
+	# Initialize forcefield
 	forcefield_active = false
 	collision_shape_FF.disabled = true
 	sprite_2d_FF.visible = false
-	force_field_timer.timeout.connect(_on_forcefield_timer_timeout)
-	forcefield.area_entered.connect(Callable(self, "_on_forcefield_area_entered"))
- 
-func _on_area_2d_area_entered(area):
-	timer.start()
-	cpu_particles_2d.emitting = true
-	can_flap = false
-	area_2d.queue_free()
- 
-func death():
-	emit_signal("hit_obstacle")
- 
+
+	# Connect signals
+	area_2d.area_entered.connect(_on_area_entered)
+	forcefield_timer.timeout.connect(_on_forcefield_timeout)
+
 func _process(delta: float) -> void:
+	# Apply gravity to motion
 	motion.y += gravity * delta
- 
-	if can_flap and Input.is_action_just_pressed("ui_accept"):
+
+	# Flap logic
+	if can_flap and Input.is_action_just_pressed("ui_accept"):  # Default "ui_accept" is spacebar
 		motion.y = flap_strength
- 
+
+	# Update rotation based on motion
 	var target_rotation = motion.y / 1000.0 * max_rotation_angle
 	rotation = lerp(rotation, target_rotation, rotation_speed * delta)
-	position += motion * delta
-	
-	if Input.is_action_just_pressed("forcefield") and not forcefield_active:
-		print("forcefield activated")
-		activate_forcefield()
-		
-func _on_forcefield_area_entered(area: Area2D) -> void:
-	# Handle collision with obstacles
-	if area.name == "Obstacle":
-		if forcefield_active:
-			print ("forcefield active: passing through the object")
-			area.disable_collision()  # Removes the collision shape
-			forcefield_active_obstacles.append(area) #track for later re-enabling
-		else:
-			print("Player hits an object!")
-			timer.start()
-			cpu_particles_2d.emitting = true
-			can_flap = false
 
-		
+	# Update position
+	position.y += motion.y * delta
+
 func activate_forcefield() -> void:
-	print("forcefield activated")
-	forcefield_active = true
-	collision_shape_FF.disabled = false
-	sprite_2d_FF.visible = true
-	force_field_timer.start()
-	
-func _on_forcefield_timer_timeout() -> void:
-	print("forcefield deactivated")
+	# Activate the forcefield if not already active
+	if not forcefield_active:
+		forcefield_active = true
+		collision_shape_FF.disabled = false
+		sprite_2d_FF.visible = true
+		forcefield_timer.start(3.0)  # Duration of forcefield
+		print("Forcefield activated!")
+
+func _on_forcefield_timeout() -> void:
+	# Deactivate the forcefield
 	forcefield_active = false
 	collision_shape_FF.disabled = true
 	sprite_2d_FF.visible = false
-	
-	#re-enable collisions for any affected obstacles
-	for obstacle in forcefield_active_obstacles:
-		if obstacle and not obstacle.collision_disabled:
-			obstacle.enable_collision()
-	forcefield_active_obstacles.clear() #clear the list
-			
+	print("Forcefield deactivated.")
+
+func _on_area_entered(area: Area2D) -> void:
+	# Handle collisions with obstacles
+	if area.name == "Obstacle" and not forcefield_active:
+		emit_signal("hit_obstacle")  # Notify Main script of collision
+		print("Player hit an obstacle!")
